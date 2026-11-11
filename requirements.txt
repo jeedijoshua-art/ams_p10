@@ -1,0 +1,14 @@
+# AMS Practicum 10 - DevOps Pipeline Dependencies
+
+# Automated testing and coverage
+pytest>=9.0.3
+pytest-cov>=6.0.0
+
+# Code quality
+flake8>=7.1.0
+
+# Security scanning
+bandit>=1.9.0
+
+# Dependency vulnerability scanning
+pip-audit>=2.10.1

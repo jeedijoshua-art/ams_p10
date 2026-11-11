@@ -1,0 +1,66 @@
+name: AMS DevOps Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build-test-security:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # 1. Checkout source code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Configure Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # 3. Install dependencies
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install flake8 bandit pip-audit
+
+      # 4. Code quality check
+      - name: Flake8 Code Quality
+        run: |
+          flake8 attendance.py tests --max-line-length=100
+
+      # 5. Python security scan
+      - name: Bandit Security Scan
+        run: |
+          bandit -q -r attendance.py
+      # 6. Dependency vulnerability scan
+      - name: Dependency Audit
+        run: |
+          pip-audit -r requirements.txt
+
+      # 7. Automated testing and coverage
+      - name: Run Pytest
+        run: |
+          python -m pytest \
+            --cov=attendance \
+            --cov-report=term-missing \
+            --cov-fail-under=90
+
+      # 8. Docker image build
+      - name: Build Docker Image
+        run: |
+          docker build -t ams-devops-demo .
+      # 9. Run tests inside Docker
+      - name: Docker Container Testing
+        run: |
+          docker run --rm ams-devops-demo
